@@ -45,7 +45,7 @@ async function load() {
           stateMutability: 'nonpayable',
           type: 'function',
         },
-        {
+        { 
           inputs: [
             {
               internalType: 'address',
