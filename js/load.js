@@ -14,14 +14,149 @@ async function load() {
       location.reload();
     }
     contract = new web3.Contract(
-      [],
+      [
+        {
+          inputs: [
+            {
+              internalType: 'address',
+              name: 'referral',
+              type: 'address',
+            },
+            {
+              internalType: 'uint256',
+              name: 'amount',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'months',
+              type: 'uint256',
+            },
+          ],
+          name: 'Deposit',
+          outputs: [],
+          stateMutability: 'payable',
+          type: 'function',
+        },
+        {
+          inputs: [],
+          name: 'Staking',
+          outputs: [],
+          stateMutability: 'nonpayable',
+          type: 'function',
+        },
+        {
+          inputs: [
+            {
+              internalType: 'address',
+              name: 'a',
+              type: 'address',
+            },
+          ],
+          name: 'getDownlines',
+          outputs: [
+            {
+              internalType: 'address[]',
+              name: '',
+              type: 'address[]',
+            },
+          ],
+          stateMutability: 'view',
+          type: 'function',
+        },
+        {
+          inputs: [
+            {
+              internalType: 'address',
+              name: 'a',
+              type: 'address',
+            },
+          ],
+          name: 'getUplines',
+          outputs: [
+            {
+              internalType: 'address',
+              name: 'd1',
+              type: 'address',
+            },
+            {
+              internalType: 'address',
+              name: 'd2',
+              type: 'address',
+            },
+            {
+              internalType: 'address',
+              name: 'd3',
+              type: 'address',
+            },
+          ],
+          stateMutability: 'view',
+          type: 'function',
+        },
+        {
+          inputs: [
+            {
+              internalType: 'address',
+              name: '',
+              type: 'address',
+            },
+          ],
+          name: 'user',
+          outputs: [
+            {
+              internalType: 'address',
+              name: 'upline',
+              type: 'address',
+            },
+            {
+              internalType: 'uint256',
+              name: 'wallet',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'lastClaimed',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'dateJoined',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'months',
+              type: 'uint256',
+            },
+            {
+              internalType: 'uint256',
+              name: 'balances',
+              type: 'uint256',
+            },
+          ],
+          stateMutability: 'view',
+          type: 'function',
+        },
+      ],
       '0x80BB34c189D43C6c3b3FB8B7921A6A389Ed92198'
     );
     contract = contract.methods;
   }
 }
-async function deposit() {}
-async function stake() {}
+async function deposit() {
+  await contract.Deposit(acct[0], 1000, 9).send({
+    from: acct[0],
+    value: 0.0e18,
+  });
+  location.reload();
+}
+async function stake() {
+  await contract.Staking().send({
+    from: acct[0],
+    value: 0.0e18,
+  });
+  location.reload();
+}
 load();
 $(document).ready(function () {
   setInterval(async function () {
