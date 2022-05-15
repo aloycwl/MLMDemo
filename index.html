@@ -25,7 +25,6 @@
   <body>
     <a id="connect" onclick="load();">Connect</a>
     <div id="root" class="hide">
-      Please connect only to BSC mainnet (network ID: 97)<br /><br />
       Referred by: <span id="txtRB"></span><br /><br />
       <a onclick="deposit()">Deposit</a> - Approval first - Deposit next
       <br /><br />
@@ -36,7 +35,10 @@
         onclick="navigator.clipboard.writeText($(location).attr('host')+'#'+$(this).val());$('#copied').show()"
       />
       <i id="copied" class="hide">Copied</i><br /><br />
-      <a onclick="stake()">Staking update</a>
+      <a onclick="stake()">Staking update</a><br /><br />
+      <p id="p1">USDT available:</p>
+      <p id="p2">User's info:</p>
+      <p id="p3">Downlines:</p>
     </div>
   </body>
 </html>
