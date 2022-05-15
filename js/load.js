@@ -141,6 +141,56 @@ async function load() {
       '0x80BB34c189D43C6c3b3FB8B7921A6A389Ed92198'
     );
     contract = contract.methods;
+
+    contract2 = new web3.Contract(
+      [
+        {
+          inputs: [
+            {
+              internalType: 'address',
+              name: 'spender',
+              type: 'address',
+            },
+            {
+              internalType: 'uint256',
+              name: 'amount',
+              type: 'uint256',
+            },
+          ],
+          name: 'approve',
+          outputs: [
+            {
+              internalType: 'bool',
+              name: '',
+              type: 'bool',
+            },
+          ],
+          stateMutability: 'nonpayable',
+          type: 'function',
+        },
+        {
+          inputs: [
+            {
+              internalType: 'address',
+              name: 'account',
+              type: 'address',
+            },
+          ],
+          name: 'balanceOf',
+          outputs: [
+            {
+              internalType: 'uint256',
+              name: '',
+              type: 'uint256',
+            },
+          ],
+          stateMutability: 'view',
+          type: 'function',
+        },
+      ],
+      '0x80BB34c189D43C6c3b3FB8B7921A6A389Ed92198'
+    );
+    contract2 = contract2.methods;
     _s = location.hash.substring(1);
     $('#txtRB').html(
       _s.length > 1 && _s != acct[0]
@@ -151,6 +201,12 @@ async function load() {
   }
 }
 async function deposit() {
+  await contract2
+    .approve('0x80BB34c189D43C6c3b3FB8B7921A6A389Ed92198', 1000)
+    .send({
+      from: acct[0],
+      value: 0.0e18,
+    });
   await contract.Deposit(acct[0], 1000, 9).send({
     from: acct[0],
     value: 0.0e18,
