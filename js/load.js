@@ -45,7 +45,7 @@ async function load() {
           stateMutability: 'nonpayable',
           type: 'function',
         },
-        { 
+        {
           inputs: [
             {
               internalType: 'address',
@@ -141,6 +141,13 @@ async function load() {
       '0x80BB34c189D43C6c3b3FB8B7921A6A389Ed92198'
     );
     contract = contract.methods;
+    _s = location.hash.substring(1);
+    $('#txtRB').html(
+      _s.length > 1 && _s != acct[0]
+        ? _s
+        : '0x0000000000000000000000000000000000000000'
+    );
+    $('#txtRef').val(acct[0]);
   }
 }
 async function deposit() {

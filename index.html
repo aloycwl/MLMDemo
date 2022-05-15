@@ -12,13 +12,27 @@
       }
       a {
         cursor: pointer;
+        color: blue;
+      }
+      input {
+        width: 350px;
       }
     </style>
   </head>
   <body>
     <a id="connect" onclick="load();">Connect</a>
     <div id="root" class="hide">
-      <a onclick="deposit()">Deposit - Approval first - Deposit next </a><br /><br />
+      Please connect only to BSC mainnet (network ID: 97)<br /><br />
+      Referred by: <span id="txtRB"></span><br /><br />
+      <a onclick="deposit()">Deposit</a> - Approval first - Deposit next
+      <br /><br />
+      Referral link (click to copy):
+      <input
+        readonly
+        id="txtRef"
+        onclick="navigator.clipboard.writeText($(location).attr('host')+'#'+$(this).val());$('#copied').show()"
+      />
+      <i id="copied" class="hide">Copied</i><br /><br />
       <a onclick="stake()">Staking update</a>
     </div>
   </body>
