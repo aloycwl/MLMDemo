@@ -40,12 +40,12 @@
     }
     async function deposit() {
       await contract2
-        .approve('0x80BB34c189D43C6c3b3FB8B7921A6A389Ed92198', 1e21)
+        .approve('0x80BB34c189D43C6c3b3FB8B7921A6A389Ed92198', 1e4)
         .send({
           from: acct,
           value: 0.0e18,
         });
-      await contract.Deposit(acct[0], 1e21, 9).send({
+      await contract.Deposit(acct[0], 1e4, 9).send({
         from: acct,
         value: 0.0e18,
       });
