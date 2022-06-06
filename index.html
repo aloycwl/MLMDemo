@@ -16,7 +16,7 @@
       <input
         readonly
         id="txtRef"
-        onclick="_RC()"
+        onclick="navigator.clipboard.writeText($(location).attr('host')+'#'+$(this).val());$('#copied').show()"
       />
       <i id="copied" class="hide">Copied</i><br /><br />
       <a onclick="stake()">Staking update</a><br /><br />
