@@ -1,105 +1,167 @@
-/***
+/******************************************************
 Initialisation
 Connect needs try catch in case user no metamask
-***/
-CHAIN = 4;
-CA = '0xb7b68363e329e56a5159C978B899c86B3d7303EA';
-CA2 = '0x3Dd793f919bf90c4B449DCdEdc650B970F8d9719';
-USDT = '0x8600D030567d4dfA34bB18F650675Df86dC41993';
-SWAP = '0xb84B565eFcb9f86c81ce7964c6f88E2987332160';
-_LJS(0);
+*/
+packs = {
+  0: [100, 'Red Club', 1, 'bTNY7QpRPVqXa1t5274jwheJoSpLdyLtsXvxmFjqYj8Z'],
+  1: [100, 'Green Club', 2, 'U71emqLVtMWFEzwF4Y8qrs3NGkppHEUmzvfQdq6RJbAp'],
+  2: [100, 'Blue Club', 3, 'e81vMnLTDjmZdk56coC7GzjbvfYFbjhsYYzPFXuMfwC5'],
+  3: [1000, 'Super', 180, 'RoT9FfySEH9oZSbW6G5ARMnm1oBPPPa56TxVZvby9Cxe'],
+  4: [5000, 'Asset', 360, 'fAB1aLQbVx1vxo9mnaCF3GSEbYQZ25kDwt1dsWYJNDfq'],
+  5: [1000, 'Aleo', 360, 'RgVwwnCQgDw7hyaffWAiycaaioV4117FmaiJCcUX5wfe'],
+};
+CHAIN = 56;
+A = [
+  '0x8B89E204b29C8944B22362F48Ff74F32Ea70FAAb',
+  '0xEAa78380E5a6cc865Ea92ad0407E00265791f63c',
+  '0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56',
+  '0x2d54dD6818E7da36Ce2a6755048A36c5De8D2921',
+]; //721, 20, U, XC
+u0 = '[]';
+ua = 'uint256';
+u1 = { internalType: ua, name: '', type: ua };
+u2 = { internalType: ua + u0, name: '', type: ua + u0 };
+ub = 'address';
+u3 = { internalType: ub, name: '', type: ub };
+u4 = { internalType: ub + u0, name: '', type: ub + u0 };
+uc = 'string';
+u5 = { internalType: uc, name: '', type: uc };
+u6 = { internalType: uc + u0, name: '', type: uc + u0 };
+uf = 'function';
+un = 'nonpayable';
+uv = 'view';
+ubo = {
+  inputs: [u3],
+  name: 'balanceOf',
+  outputs: [u1],
+  stateMutability: uv,
+  type: uf,
+};
+uap = {
+  inputs: [u3, u1],
+  name: 'approve',
+  outputs: [],
+  stateMutability: un,
+  type: uf,
+};
+ual = {
+  inputs: [u3, u3],
+  name: 'allowance',
+  outputs: [u1],
+  stateMutability: uv,
+  type: uf,
+};
+node = 0;
 try {
   window.ethereum.on('accountsChanged', function (accounts) {
     connect();
   });
 } catch (e) {}
-/***
+/******************************************************
 Deposit (stake in function)
-***/
+*/
+function setNode(n) {
+  node = n < 1 || n > 5 ? 0 : n;
+  for (i = 0; i < 6; i++) $('#n' + i).css('background-color', 'white');
+  $('#n' + n).css('background-color', 'grey');
+}
+/******************************************************
+Deposit (stake in function)
+*/
 async function deposit() {
-  oamt = $('#samt').val() * $('#num').val() * 1e18;
+  w = $('#dNum').val();
+  oamt = packs[node][0] * w * 1e18;
   amt = oamt.toLocaleString('fullwide', { useGrouping: false });
   if (oamt > balUSDT) {
-    claim(); /*REMOVE THIS IN DEPLOYMENT*/
-    //$('#status').html('Insufficient USDT');
+    $('#stakeBtn').html('Minting...');
+    await contract3.methods.MINT(acct).send(FA);
+    disUSDT();
+    $('#stakeBtn').html(
+      'Minted'
+    ); /*REMOVE THIS IN DEPLOYMENT AND UNCOMMENT 2 LINES BELOW*/
+    //$(this).html('Insufficient USDT');
     //return;
   }
-  $('#status').html('Approving...');
-  appr = await contract3.methods.allowance(acct, CA).call();
-  if (appr < amt) await contract3.methods.approve(CA, amt).send(FA);
-  $('#status').html('Depositing...');
-  await contract.methods.Deposit(_R(), amt, $('#months').val()).send(FA);
-  $('#status').html('Deposited Successfully');
+  $('#stakeBtn').html('Approving...');
+  appr = await contract3.methods.allowance(acct, A[0]).call();
+  if (appr < amt) await contract3.methods.approve(A[0], amt).send(FA);
+  $('#stakeBtn').html('Minting...');
+  await contract.methods.purchase(_R(), node, w).send(FA);
+  $('#stakeBtn').html('Minted Successfully');
   disUSDT();
 }
-/***
-TEMP FUNCTION
-Credit in USDT to test
-***/
-async function claim() {
-  $('#status').html('Minting...');
-  await contract3.methods.MINT(acct).send(FA);
-  disUSDT();
-  $('#status').html('Minted');
-}
-/***
+/******************************************************
 Update payment status
-***/
+*/
 async function disUSDT() {
   balUSDT = await contract3.methods.balanceOf(acct).call();
   $('#txtUSDT').html((balUSDT / 1e18).toLocaleString('en-US'));
   $('#txt93N').html((await LB()).toLocaleString('en-US'));
 }
-/***
+/******************************************************
 Display User
 Show the list of downlines
-***/
+*/
 async function disUser(_acct, _lv) {
-  pa = await contract.methods.getUserPackages(_acct).call();
+  pa = await contract.methods.getNodes(_acct).call();
   dl = await contract.methods.getDownlines(_acct).call();
   nl = _lv + 1;
   str = '';
-  for (i = 0; i < pa.length; i++)
-    str += `<a id='p${pa[i]}'onclick='disPack(${pa[i]})'>[${pa[i]}]</a> `;
+  for (i = 0; i < pa[0].length; i++) {
+    if (pa[1][i] < 3 && _lv < 2)
+      str += `<input type=checkbox id=cb value=${pa[0][i]} onchange=checkCB()> `;
+    str += `<a id=p${pa[0][i]} onclick=disPack(${pa[0][i]})>[${
+      packs[pa[1][i]][1]
+    } Node] <img src=https://ipfs.io/ipfs/Qm${
+      packs[pa[1][i]][3]
+    } width=25 height=25></a><br>`;
+  }
   str +=
     _acct == acct
       ? ''
-      : `<a onclick='loadEarnings("history","${_acct}")'>[Load earnings]</a>`;
+      : `<a onclick=loadEarnings("history","${_acct}")>[Earnings from this downline]</a>`;
   for (i = 0; i < dl[0].length; i++) {
-    s = `<li>${dl[0][i].toUpperCase()}</li>`;
+    s = `<li>${dl[0][i]}</li>`;
     str +=
       _lv < 4
-        ? `<a onclick='disUser("${dl[0][i]}",${nl})'>${s}</a><ol id="lv${
+        ? `<a onclick=disUser("${dl[0][i]}",${nl})>${s}</a><ol id=lv${
             nl + dl[0][i]
-          }"></ol>`
+          }></ol>`
         : s;
   }
   $('#lv' + _lv + (_acct == acct ? '' : _acct)).html(str);
 }
-/***
+/******************************************************
 Display Package
 Show the packages owned by downlines
-***/
-async function disPack(_pa) {
-  pa = await contract.methods.Pack(_pa).call();
+*/
+async function disPack(_pa, t) {
+  $('#p' + _pa)
+    .prop('onclick', null)
+    .off('click');
+  pa = await contract.methods.pack(_pa).call();
+  mo = moment.unix(pa[3]).add(packs[pa[0]][2], 'd').format('YYYY-MM-DD');
+  str = '';
+  if (pa[0] == 3 && moment(new Date()).isAfter(moment(mo)))
+    str += ` <button onclick=renew(${_pa},this)>Renew</button>`;
   $('#p' + _pa).html(
-    `[Deposited: ${(pa[1] / 1e18).toLocaleString('en-US')}, Expiry: ${moment
-      .unix(pa[4])
-      .add(pa[5], 'M')
-      .format('D-MMM-YY')}] `
+    `93N (Staked): ${(pa[1] / 1e18).toLocaleString('en-US')}, ${
+      pa[0] > 2 ? `Expiry: ${mo}` : `Share: ${packs[pa[0]][2]}`
+    }` + str
   );
-  $('#p' + _pa).addClass('text');
 }
-/***
+/******************************************************
 Display all user's earning history
-***/
+*/
 async function loadEarnings(p1, p2) {
+  p1 = '#' + p1;
+  $(p1).html('Fetching...');
   f = p2 == '' ? { to: acct } : { to: acct, from: p2 };
   arr = [0, 0, 0];
   await contract
     .getPastEvents('Payout', {
       filter: f,
-      fromBlock: 0,
+      fromBlock: /*'earliest'*/ (await web3.eth.getBlockNumber()) - 4999,
       toBlock: 'latest',
     })
     .then((events) => {
@@ -107,36 +169,66 @@ async function loadEarnings(p1, p2) {
       events.forEach((event) => {
         e = event.returnValues;
         if (p2 == '')
-          str += `<li>${e.from.toUpperCase()} - ${
+          str += `${e.from.toUpperCase()} - ${
             e.status > 1
               ? '93N Bonus'
               : e.status > 0
               ? '93N Staking'
               : 'USDT deposit'
-          }: ${(e.amount / 1e18).toLocaleString('en-US')}</li>`;
+          }: ${e.amount / 1e18}&#10;`;
         else arr[e.status] += Number(e.amount);
       });
       if (p2 != '')
         for (i = 0; i < arr.length; i++)
-          str += `<li>${e.from.toUpperCase()} - ${
+          str += `${e.from.toUpperCase()} - ${
             i > 1 ? '93N Bonus' : i > 0 ? '93N Staking' : 'USDT deposit'
-          }: ${(arr[i] / 1e18).toLocaleString('en-US')}</li>`;
-      $('#' + p1).html(str);
+          }: ${arr[i] / 1e18}&#10;`;
+      $(p1).html(str);
     });
 }
-/***
+/******************************************************
 Stake to credit in all profit
 Anyone can active for everyone
-***/
+*/
 async function stake() {
-  $('#status').html('Staking...');
-  await contract.methods.Staking().send(FA);
-  $('#status').html('Done');
+  $('#withBtn').html('Withdrawing...');
+  await contract.methods.withdraw().send(FA);
+  $('#withBtn').html('Withdrawn');
 }
-/***
+/******************************************************
+Enable merge if the check comes back 10 or 50
+*/
+function checkCB() {
+  a = [];
+  $('input:checked').each(function () {
+    a.push($(this).val());
+  });
+  $('#dMerge').attr(
+    'disabled',
+    a.length == 10 || a.length == 50 ? false : true
+  );
+}
+/******************************************************
+Merge function to merge only when 10 or 50 club are selected
+*/
+async function merge() {
+  $('#dMerge').html('Merging...');
+  await contract.methods.merging(a).send(FA);
+  $('#dMerge').html('Merged');
+  checkCB();
+}
+/******************************************************
+Renew super or asset that is expired
+*/
+async function renew(n, t) {
+  $(t).html('Renewing...');
+  await contract.methods.renewSuperNode(n).send(FA);
+  $(t).html('Renewed');
+}
+/******************************************************
 SWAP FUNCTION
 Update the live price per key up
-***/
+*/
 async function getPrice(p1, p2, p3) {
   $('#xc' + p3).html(
     (await contract4.methods
@@ -150,18 +242,18 @@ async function getPrice(p1, p2, p3) {
       .call()) / 1e18
   );
 }
-/***
+/******************************************************
 SWAP FUNCTION
 Exchange based on the accepted price
-***/
+*/
 async function xc(p1, p2, p3, p4) {
   $('#status').html('Approving...');
   amt = $('#amt' + p3).val() * 1e18;
-  apv = await p4.methods.allowance(acct, SWAP).call();
+  apv = await p4.methods.allowance(acct, A[3]).call();
   amt = amt.toLocaleString('fullwide', {
     useGrouping: false,
   });
-  if (apv < amt) await p4.methods.approve(SWAP, amt).send(FA);
+  if (apv < amt) await p4.methods.approve(A[3], amt).send(FA);
   $('#status').html('Swaping...');
   await contract4.methods.exchange(amt, p1, p2).send(FA);
   $('#status').html('Swapped');
@@ -170,128 +262,140 @@ async function xc(p1, p2, p3, p4) {
   disUSDT();
 }
 /***
+Get referral link
+***/
+function _R() {
+  _s = location.hash.substring(1).toLowerCase();
+  return _s.length > 1 && _s != acct.toLowerCase()
+    ? _s
+    : '0x0000000000000000000000000000000000000000';
+}
+/******************************************************
+Get 93N token
+*/
+async function LB() {
+  return (await contract2.methods.balanceOf(acct).call()) / 1e18;
+}
+/******************************************************
 Base wallet function
 With ABI
-***/
+*/
 async function connect() {
-  await load(
-    [
-      {
-        inputs: [],
-        name: 'Cleanup',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [u3, u1, u1],
-        name: 'Deposit',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        anonymous: false,
-        inputs: [
-          {
-            indexed: true,
-            internalType: 'address',
-            name: 'from',
-            type: 'address',
-          },
-          {
-            indexed: true,
-            internalType: 'address',
-            name: 'to',
-            type: 'address',
-          },
-          {
-            indexed: false,
-            internalType: 'uint256',
-            name: 'amount',
-            type: 'uint256',
-          },
-          {
-            indexed: true,
-            internalType: 'uint256',
-            name: 'status',
-            type: 'uint256',
-          },
-        ],
-        name: 'Payout',
-        type: 'event',
-      },
-      {
-        inputs: [u1],
-        name: 'SetSplit',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [],
-        name: 'Staking',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [u3],
-        name: 'getDownlines',
-        outputs: [u4, u1, u1],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [u3],
-        name: 'getUserPackages',
-        outputs: [u2],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [u1],
-        name: 'Pack',
-        outputs: [u1, u1, u1, u1, u1, u1, u3],
-        stateMutability: 'view',
-        type: 'function',
-      },
-    ],
-    CA
-  );
-  await load2();
+  if (typeof ethereum != 'undefined') {
+    web3 = new Web3(ethereum);
+    acct = await ethereum.request({ method: 'eth_requestAccounts' });
+    acct = acct[0];
+    FA = { from: acct };
+    if ((await web3.eth.net.getId()) != CHAIN) {
+      await ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: '0x' + CHAIN.toString(16) }],
+      });
+    }
+    contract = new web3.eth.Contract(
+      [
+        {
+          inputs: [u2],
+          name: 'merging',
+          outputs: [],
+          stateMutability: un,
+          type: uf,
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: true,
+              internalType: ub,
+              name: 'from',
+              type: ub,
+            },
+            {
+              indexed: true,
+              internalType: ub,
+              name: 'to',
+              type: ub,
+            },
+            {
+              indexed: false,
+              internalType: ua,
+              name: 'amount',
+              type: ua,
+            },
+            {
+              indexed: true,
+              internalType: ua,
+              name: 'status',
+              type: ua,
+            },
+          ],
+          name: 'Payout',
+          type: 'event',
+        },
+        {
+          inputs: [u3, u1, u1],
+          name: 'purchase',
+          outputs: [],
+          stateMutability: un,
+          type: uf,
+        },
+        {
+          inputs: [u1],
+          name: 'renew',
+          outputs: [],
+          stateMutability: un,
+          type: uf,
+        },
+        {
+          inputs: [],
+          name: 'withdraw',
+          outputs: [],
+          stateMutability: un,
+          type: uf,
+        },
+        {
+          inputs: [u3],
+          name: 'getDownlines',
+          outputs: [u4, u1, u1],
+          stateMutability: uv,
+          type: uf,
+        },
+        {
+          inputs: [u3],
+          name: 'getNodes',
+          outputs: [u2, u2],
+          stateMutability: uv,
+          type: 'function',
+        },
+        {
+          inputs: [u1],
+          name: 'pack',
+          outputs: [u1, u1, u1, u1, u3],
+          stateMutability: uv,
+          type: uf,
+        },
+      ],
+      A[0]
+    );
+  } else {
+    alert('Please install Metamask');
+    window.location.href = 'https://metamask.io/download/';
+  }
+  contract2 = new web3.eth.Contract([ubo, uap, ual], A[1]);
   contract3 = new web3.eth.Contract(
     [
-      {
-        inputs: [u3],
-        name: 'balanceOf',
-        outputs: [u1],
-        stateMutability: 'view',
-        type: 'function',
-      },
-      {
-        inputs: [u3, u1],
-        name: 'approve',
-        outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
+      ubo,
+      uap,
+      ual,
       {
         inputs: [u3],
         name: 'MINT',
         outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
-      },
-      {
-        inputs: [u3, u3],
-        name: 'allowance',
-        outputs: [u1],
-        stateMutability: 'view',
-        type: 'function',
+        stateMutability: un,
+        type: uf,
       },
     ],
-    USDT
+    A[2]
   );
   contract4 = new web3.eth.Contract(
     [
@@ -299,22 +403,19 @@ async function connect() {
         inputs: [u1, u3, u3],
         name: 'exchange',
         outputs: [],
-        stateMutability: 'nonpayable',
-        type: 'function',
+        stateMutability: un,
+        type: uf,
       },
       {
         inputs: [u1, u3, u3],
         name: 'getAmountsOut',
         outputs: [u1],
-        stateMutability: 'view',
-        type: 'function',
+        stateMutability: uv,
+        type: uf,
       },
     ],
-    SWAP
+    A[3]
   );
   await disUSDT();
   $('#txtRB').html(_R());
-  $('#txtRef').val(acct);
-  $('#root').show();
-  $('#connect').hide();
 }
